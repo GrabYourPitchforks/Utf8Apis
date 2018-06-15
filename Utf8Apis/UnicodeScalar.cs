@@ -6,6 +6,9 @@ using System.Text;
 
 namespace System.Text
 {
+    // Represents a Unicode scalar value ([ U+0000..U+D7FF ], inclusive; or [ U+E000..U+10FFFF ], inclusive).
+    // This type's ctors are guaranteed to validate the input, and consumers can call the APIs assuming
+    // that the input is well-formed.
     public readonly struct UnicodeScalar : IComparable<UnicodeScalar>, IEquatable<UnicodeScalar>
     {
         public UnicodeScalar(char ch) => throw null;
@@ -25,12 +28,24 @@ namespace System.Text
         public int Utf8SequenceLength { get => throw null; } // = 1..4
         public uint Value { get => throw null; }
         public int CompareTo(UnicodeScalar other) => throw null;
+
+        // Allows constructing a Unicode scalar value from an arbitrary 32-bit integer without
+        // validation. It is the caller's responsibility to have performed manual validation
+        // before calling this method. If a UnicodeScalar instance is forcibly constructed
+        // from invalid input, the APIs on this type have undefined behavior, up to and including
+        // introducing a security hole in the consuming application.
+
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static UnicodeScalar DangerousCreateWithoutValdation(uint scalarValue) => throw null;
+
         public override bool Equals(object obj) => throw null;
         public bool Equals(UnicodeScalar other) => throw null;
         public override int GetHashCode() => throw null;
+
+        // Determines whether an arbitrary integer is a valid Unicode scalar value.
+        // Not an instance method becuase we always assume 'this' is valid.
         public static bool IsValid(int value) => throw null;
+
         public override string ToString() => throw null;
         public int ToUtf16(Span<char> output) => throw null;
         public int ToUtf8(Span<Char8> output) => throw null;
