@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+    <RuntimeFrameworkVersion>2.1.0-rtm-26514-02</RuntimeFrameworkVersion>
+  </PropertyGroup>
+
+</Project>
