@@ -11,7 +11,9 @@ namespace System.Text
     // that the input is well-formed.
     public readonly struct UnicodeScalar : IComparable<UnicodeScalar>, IEquatable<UnicodeScalar>
     {
-        public UnicodeScalar(char ch) => throw null;
+        public UnicodeScalar(byte b) => throw null; // from UTF-8 code unit (must be ASCII)
+        public UnicodeScalar(Char8 ch) => throw null; // from UTF-8 code unit (must be ASCII)
+        public UnicodeScalar(char ch) => throw null; // from UTF-16 code unit (must not be surrogate)
         public UnicodeScalar(int scalarValue) => throw null;
         public UnicodeScalar(uint scalarValue) => throw null;
         public static bool operator ==(UnicodeScalar a, UnicodeScalar b) => throw null;

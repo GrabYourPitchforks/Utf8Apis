@@ -24,38 +24,56 @@ namespace System
     // of Char8 elements. (Or, "byte length" if you prefer.)
     //
     // n.b. not IComparable because comparison implies lexical (culture-aware) ordering.
-    public sealed unsafe class Utf8String : IConvertible, IEquatable<Utf8String>
+    public sealed unsafe class Utf8String : IComparable<Utf8String>, IConvertible, IEquatable<Utf8String>
     {
-        // All public ctors are validating ctors.
-        // O(n) for memcpy and O(n) for validation.
-        // For transcoding (UTF-16 -> UTF-8), validation cannot be skipped.
-        // Behavior given invalid input: fixes up bad sequences on-the-fly.
+        /*
+         * CONSTRUCTORS
+         * All public ctors are validating ctors.
+         * Complexity is O(n) for memcpy and O(n) for validation.
+         * Behavior given invalid input: bad sequences replaced with U+FFFD.
+         * Scroll down further in the file for static factories that suppress validation.
+         */
+
+        // For null-terminated UTF-8 and UTF-16 sequences.
+        // If not null-terminated, wrap (ptr, length) in a Span and call the Span-based ctors.
         public Utf8String(byte* value) => throw null;
-        public Utf8String(ReadOnlySpan<byte> value) => throw null;
+        public Utf8String(Char8* value) => throw null;
         public Utf8String(char* value) => throw null;
-        public Utf8String(string value) => throw null;
+
+        // For non null-terminated UTF-8 and UTF-16 sequences.
+        public Utf8String(ReadOnlySpan<byte> value) => throw null;
+        public Utf8String(ReadOnlySpan<Char8> value) => throw null;
         public Utf8String(ReadOnlySpan<char> value) => throw null;
 
-        // Ordinal (byte-by-byte) comparison
+        // For discoverability / ease of use, equivalent to ROS<char>-based ctor
+        public Utf8String(String value) => throw null;
+
+        /*
+         * COMPARISON
+         * All equality / comparison methods which don't explicitly take a StringComparison
+         * are ordinal by default. This differs slightly from System.String but is self-consistent
+         * within the Utf8String class.
+         */
+
         public static bool operator ==(Utf8String a, Utf8String b) => throw null;
         public static bool operator !=(Utf8String a, Utf8String b) => throw null;
 
-        // Matches the implicit cast from String -> ReadOnlySpan<char>
-        public static implicit operator ReadOnlySpan<Char8>(Utf8String value) => throw null;
+        public int CompareTo(Utf8String other) => throw null; // for IComparable<Utf8String>
 
-        // n.b. No implicit or explicit cast from Utf8String <-> String.
-        // Reason for this is that such an operation would be O(n), and casts should really
-        // be constant-time operations. Use ToString() / ToUtf8String() instead.
+        public int Compare(Utf8String a, Utf8String b, StringComparison comparisonType) => throw null;
+        public int CompareOrdinal(Utf8String a, Utf8String b) => throw null;
 
-        // Returns access to the raw bytes (as a span)
-        public ReadOnlySpan<byte> Bytes { get => throw null; }
+        /*
+         * PROJECTION
+         * n.b. No implicit or explicit cast from Utf8String <-> String.
+         * Reason for this is that the cast would have O(n) complexity, which would be
+         * potentially surprising for developers. Use ToString() / ToUtf8String() instead.
+         */
 
-        // Returns access to the raw Char8s (as a span)
-        // (I dislike this name. Perhaps it's not even necessary due to the implicit cast?)
-        public ReadOnlySpan<Char8> Char8s { get => throw null; }
-
-        // Returns access to the scalars (as an enumerable sequence)
-        public ScalarSequence Scalars { get => throw null; }
+        public ReadOnlySpan<byte> AsBytes() => throw null;
+        public ReadOnlyMemory<Char8> AsMemory() => throw null;
+        public ScalarSequence AsScalars() => throw null; // custom struct enumerable
+        public ReadOnlySpan<Char8> AsSpan() => throw null;
 
         // static readonly field, not property or const, to match String.Empty
         public static readonly Utf8String Empty;
@@ -63,10 +81,12 @@ namespace System
         // Length (in Char8s)
         public int Length { get => throw null; }
 
-        public ReadOnlyMemory<Char8> AsMemory() => throw null;
-
-        public static int Compare(Utf8String strA, Utf8String strB, StringComparison comparisonType) => throw null;
-        public static int CompareOrdinal(Utf8String strA, Utf8String strB) => throw null;
+        /*
+         * CONCAT
+         * This set of overloads may change based on how language and compiler support for '+' works
+         * with Utf8String instances, including whether struct-based builder types come online.
+         * Let's go with this for now pending how those other features shake out.
+         */
 
         public static Utf8String Concat(IEnumerable<Utf8String> values) => throw null;
         public static Utf8String Concat(Utf8String str0, Utf8String str1) => throw null;
@@ -77,8 +97,13 @@ namespace System
         // If we had a language feature which allowed Concat(params ReadOnlySpan<...>) as a parameter, we'd
         // probably have an overload for that as well. We'd probably also want that on the String type.
 
+        public static Utf8String Concat(ReadOnlySpan<Char8> str0, ReadOnlySpan<Char8> str1) => throw null;
+        public static Utf8String Concat(ReadOnlySpan<Char8> str0, ReadOnlySpan<Char8> str1, ReadOnlySpan<Char8> str2) => throw null;
+        public static Utf8String Concat(ReadOnlySpan<Char8> str0, ReadOnlySpan<Char8> str1, ReadOnlySpan<Char8> str2, ReadOnlySpan<Char8> str3) => throw null;
+
         // First overload is ordinal; all other overloads require an explicit comparison to be specified.
         // Open question: String.Contains has no overload which takes a ROS<> parameter - do we need one?
+
         public bool Contains(UnicodeScalar value) => throw null;
         public bool Contains(UnicodeScalar value, StringComparison comparisonType) => throw null;
         public bool Contains(Utf8String value, StringComparison comparisonType) => throw null;
@@ -87,6 +112,7 @@ namespace System
         // "CreateFromBytes" is renamed so that type inference doesn't fail if the developer
         // passes an untyped lambda as the third parameter. O(n) for memcpy + O(n) for validation.
         // Behavior given invalid input: fixes up invalid sequences on-the-fly.
+
         public static Utf8String Create<TState>(int length, TState state, SpanAction<Char8, TState> action) => throw null;
         public static Utf8String CreateFromBytes<TState>(int length, TState state, SpanAction<byte, TState> action) => throw null;
 
@@ -107,6 +133,7 @@ namespace System
         // IT administrator to go directly to the database and purge the abuser's account.
 
         public static Utf8String CreateWithoutValidation<TState>(int length, TState state, SpanAction<Char8, TState> action) => throw null;
+        public static Utf8String CreateWithoutValidation<TState>(ReadOnlySpan<byte> Char8) => throw null;
         public static Utf8String CreateFromBytesWithoutValidation<TState>(int length, TState state, SpanAction<byte, TState> action) => throw null;
         public static Utf8String CreateFromBytesWithoutValidation<TState>(ReadOnlySpan<byte> value) => throw null;
 
@@ -114,25 +141,24 @@ namespace System
         public bool EndsWith(Utf8String value, StringComparison comparisonType) => throw null;
         public bool EndsWith(ReadOnlySpan<Char8> value, StringComparison comparisonType) => throw null;
 
-        // Ordinal comparison.
         // When transcoding is required, comparison is by ordinal scalar, and invalid subsequences immediately return failure.
         // Example: the UTF-8 string [ C1 80 ] will *never* match any UTF-16 string.
+
         public override bool Equals(object value) => throw null;
         public bool Equals(Utf8String value) => throw null;
         public bool Equals(string value) => throw null;
+        public static bool Equals(Utf8String a, Utf8String b) => throw null;
         public static bool Equals(Utf8String a, Utf8String b, StringComparison comparisonType) => throw null;
-        public static bool Equals(Utf8String a, string b, StringComparison comparisonType) => throw null;
 
         public override int GetHashCode() => throw null;
         public int GetHashCode(StringComparison comparisonType) => throw null;
 
         // Used for pinning. Typed as 'byte' instead of 'Char8' because the scenario for calling this
         // is p/invoke, and we don't want to require a reinterpret_cast.
+
         [EditorBrowsable(EditorBrowsableState.Never)]
         public ref readonly byte GetPinnableReference() => throw null;
 
-        // Open question: if IndexOf has overloads that take (startIndex, count), should Contains have
-        // such overloads as well? Additionally, do we want IndexOf overloads that take a ReadOnlySpan<Char8>?
         public int IndexOf(UnicodeScalar value) => throw null;
         public int IndexOf(UnicodeScalar value, int startIndex) => throw null;
         public int IndexOf(UnicodeScalar value, int startIndex, int count) => throw null;
@@ -140,7 +166,7 @@ namespace System
         public int IndexOf(Utf8String value, int startIndex, StringComparison comparisonType) => throw null;
         public int IndexOf(Utf8String value, int startIndex, int count, StringComparison comparisonType) => throw null;
 
-        // Open question: String.IndexOfAny takes array parameters - is it ok for us to take ReadOnlySpan?
+        // n.b. String.IndexOfAny takes char[], we take span (to avoid allocations)
         public int IndexOfAny(ReadOnlySpan<UnicodeScalar> value) => throw null;
         public int IndexOfAny(ReadOnlySpan<UnicodeScalar> value, int startIndex) => throw null;
         public int IndexOfAny(ReadOnlySpan<UnicodeScalar> value, int startIndex, int count) => throw null;
@@ -150,12 +176,10 @@ namespace System
         public static bool IsNullOrEmpty(Utf8String value) => throw null;
         public static bool IsNullOrWhiteSpace(Utf8String value) => throw null;
 
-        // How will we want a Join method to work without requiring transcoding to UTF-16 as an intermediate step?
-
-        public static Utf8String Join<T>(UnicodeScalar separator, IEnumerable<T> values) where T : IUtf8Stringable => throw null;
-        public static Utf8String Join<T>(UnicodeScalar separator, ReadOnlySpan<T> values) where T : IUtf8Stringable => throw null;
-        public static Utf8String Join<T>(Utf8String separator, IEnumerable<T> values) where T : IUtf8Stringable => throw null;
-        public static Utf8String Join<T>(Utf8String separator, ReadOnlySpan<T> values) where T : IUtf8Stringable => throw null;
+        public static Utf8String Join<T>(UnicodeScalar separator, IEnumerable<T> values) => throw null;
+        public static Utf8String Join<T>(UnicodeScalar separator, ReadOnlySpan<T> values) => throw null;
+        public static Utf8String Join<T>(Utf8String separator, IEnumerable<T> values) => throw null;
+        public static Utf8String Join<T>(Utf8String separator, ReadOnlySpan<T> values) => throw null;
 
         public int LastIndexOf(UnicodeScalar value) => throw null;
         public int LastIndexOf(UnicodeScalar value, int startIndex) => throw null;
@@ -168,27 +192,31 @@ namespace System
         public int LastIndexOfAny(ReadOnlySpan<UnicodeScalar> value, int startIndex) => throw null;
         public int LastIndexOfAny(ReadOnlySpan<UnicodeScalar> value, int startIndex, int count) => throw null;
 
-        // Normalization APIs may have to take low priority since we need to make significant changes
-        // to the CultureInfo class in order to support all of this.
+        // There's a risk Normalize / IsNormalized will fall below the cutline due to time constraints, but here's what
+        // it would look like if we implemented them.
+
         public bool IsNormalized() => throw null;
         public bool IsNormalized(NormalizationForm normalizationForm) => throw null;
         public Utf8String Normalize() => throw null;
         public Utf8String Normalize(NormalizationForm normalizationForm) => throw null;
 
-        // Open question: What should the behavior be if we'd end up splitting the UTF-8 representation
-        // of the scalar in order to achieve the correct padding? I'm leaning toward forbidding non-
-        // ASCII characters for the padding char, even if there's enough room.
+        // n.b. Padding takes Char8 instead of UnicodeScalar. This prevents a situation where the amount of padding
+        // required isn't wholly divisible by the number of code units in the padding character.
+
         public Utf8String PadLeft(int totalWidth) => throw null;
-        public Utf8String PadLeft(int totalWidth, UnicodeScalar paddingChar) => throw null;
+        public Utf8String PadLeft(int totalWidth, Char8 paddingChar) => throw null;
 
         public Utf8String PadRight(int totalWidth) => throw null;
-        public Utf8String PadRight(int totalWidth, UnicodeScalar paddingChar) => throw null;
+        public Utf8String PadRight(int totalWidth, Char8 paddingChar) => throw null;
 
         public Utf8String Remove(int startIndex) => throw null;
         public Utf8String Remove(int startIndex, int count) => throw null;
 
         public Utf8String Replace(UnicodeScalar oldValue, UnicodeScalar newValue) => throw null;
         public Utf8String Replace(Utf8String oldValue, Utf8String newValue, StringComparison comparisonType) => throw null;
+
+        // n.b. Utf8String.Split returns its results in an array, just like String.Split. There will be non-allocating
+        // Split APIs hanging off of ROM<Char8> / ROS<Char8> and other types for more advanced use cases.
 
         public Utf8String[] Split(UnicodeScalar separator) => throw null;
         public Utf8String[] Split(UnicodeScalar separator, int count) => throw null;
@@ -210,7 +238,7 @@ namespace System
         // holds for the String class.)
         //
         // If the developer wants to go out of their way to substring a valid string in such a way that the
-        // result is invalid UTF-8, we won't stop them. But we *can* detect this in O(1) time if necessary.
+        // result is invalid UTF-8, we won't stop them.
 
         public Utf8String Substring(int startIndex) => throw null;
         public Utf8String Substring(int startIndex, int length) => throw null;
@@ -253,6 +281,7 @@ namespace System
         ushort IConvertible.ToUInt16(IFormatProvider provider) => throw null;
         uint IConvertible.ToUInt32(IFormatProvider provider) => throw null;
         ulong IConvertible.ToUInt64(IFormatProvider provider) => throw null;
+
         public readonly struct ScalarSequence : IEnumerable<UnicodeScalar>
         {
             public ScalarEnumerator GetEnumerator() => throw null;
@@ -262,10 +291,8 @@ namespace System
         }
 
         // If the enumerator sees an invalid UTF-8 subsequence, it returns U+FFFD
-        // and moves on to the next subsequence. This means that the developer cannot
-        // differentiate the case where the string contained U+FFFD from the case where
-        // the string contained an invalid subsequence. There are other APIs to support
-        // this scenario.
+        // and moves on to the next subsequence. There are separate APIs to distinguish
+        // between "U+FFFD due to invalid data" and "the string really contained U+FFFD."
         public struct ScalarEnumerator : IEnumerator<UnicodeScalar>
         {
             public UnicodeScalar Current => throw null;
