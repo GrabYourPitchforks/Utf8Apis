@@ -34,7 +34,7 @@ namespace System.Text
         // Allows constructing a Unicode scalar value from an arbitrary 32-bit integer without
         // validation. It is the caller's responsibility to have performed manual validation
         // before calling this method. If a UnicodeScalar instance is forcibly constructed
-        // from invalid input, the APIs on this type have undefined behavior, up to and including
+        // from invalid input, the APIs on this type have undefined behavior, potentially including
         // introducing a security hole in the consuming application.
 
         [EditorBrowsable(EditorBrowsableState.Never)]
