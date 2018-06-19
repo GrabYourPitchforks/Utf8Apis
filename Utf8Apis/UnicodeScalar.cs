@@ -9,6 +9,15 @@ namespace System.Text
     // Represents a Unicode scalar value ([ U+0000..U+D7FF ], inclusive; or [ U+E000..U+10FFFF ], inclusive).
     // This type's ctors are guaranteed to validate the input, and consumers can call the APIs assuming
     // that the input is well-formed.
+    //
+    // This type's ctors validate, but that shouldn't be a terrible imposition because very few components
+    // are going to need to create instances of this type. UnicodeScalar instances will almost always be
+    // created as a result of enumeration over a UTF-8 or UTF-16 sequence, or instances will be created
+    // by the compiler from known good constants in source. In both cases validation can be elided, which
+    // means that there's *no runtime check at all* - not in the ctors nor in the instance methods hanging
+    // off this type. This gives improved performance over APIs which require the consumer to call an
+    // IsValid method before operating on instances of this type, and it means that we can get away without
+    // potentially expensive branching logic in many of our property getters.
     public readonly struct UnicodeScalar : IComparable<UnicodeScalar>, IEquatable<UnicodeScalar>
     {
         public UnicodeScalar(byte b) => throw null; // from UTF-8 code unit (must be ASCII)
@@ -36,6 +45,14 @@ namespace System.Text
         // before calling this method. If a UnicodeScalar instance is forcibly constructed
         // from invalid input, the APIs on this type have undefined behavior, potentially including
         // introducing a security hole in the consuming application.
+        //
+        // An example of a security hole resulting from an invalid UnicodeScalar value:
+        //
+        // public int GetUtf8Marvin32HashCode(UnicodeScalar s) {
+        //   Span<Char8> buffer = stackalloc Char8[s.Utf8SequenceLength];
+        //   s.ToUtf8(buffer);
+        //   return Marvin32.ComputeHash(buffer.AsBytes());
+        // }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static UnicodeScalar DangerousCreateWithoutValdation(uint scalarValue) => throw null;
