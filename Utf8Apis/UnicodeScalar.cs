@@ -55,7 +55,7 @@ namespace System.Text
         public static bool TryCreate(int value, out UnicodeScalar result) => throw null;
         public static bool TryCreate(uint value, out UnicodeScalar result) => throw null;
 
-        /* OPTIONAL - these are analogs of APIs on System.Char */
+        // These are analogs of APIs on System.Char
 
         public static double GetNumericValue(UnicodeScalar s) => throw null;
         public static UnicodeCategory GetUnicodeCategory(UnicodeScalar s) => throw null;

@@ -16,14 +16,11 @@ namespace System
     // formed UTF-8 subsequences. The APIs hanging off this type have well-defined, predictable
     // behavior regardless of whether the UTF-8 string contains invalid subsequences.
     //
-    // Open question: Do we want this to be indexable or enumerable? The Bytes and Scalars property
-    // allow indexing and enumeration. Making the type indexable might give developers a false
-    // impression of what the can actually do with the return values.
+    // The class isn't directly indexable or enumerable, instead relying on the developer to
+    // go through one of the AsBytes / AsScalars / AsSpan APIs.
     //
     // Whenever length / index / offset / count / etc. occurs in these APIs, it's in terms of number
     // of Char8 elements. (Or, "byte length" if you prefer.)
-    //
-    // n.b. not IComparable because comparison implies lexical (culture-aware) ordering.
     public sealed unsafe class Utf8String : IComparable<Utf8String>, IConvertible, IEquatable<Utf8String>
     {
         /*
