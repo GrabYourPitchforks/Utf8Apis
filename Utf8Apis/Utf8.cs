@@ -15,9 +15,9 @@ namespace System.Text
 
         // Converts UTF8 -> UTF16.
         // Assumes the input is a standalone UTF-8 string.
-        // Returns number of output chars written.
+        // Returns the slice of the destination buffer which was populated with data.
         // Throws on failure (malformed input, destination too small).
-        public static int ConvertToUtf16(
+        public static Span<char> ConvertToUtf16(
             ReadOnlySpan<byte> inUtf8,
             Span<char> outUtf16,
             InvalidSequenceBehavior invalidSequenceBehavior = InvalidSequenceBehavior.Fail) => throw null;
@@ -40,9 +40,9 @@ namespace System.Text
 
         // Converts UTF-16 -> UTF-8.
         // Assumes the input is a standalone UTF-16 string.
-        // Returns number of output bytes written.
+        // Returns the slice of the destination buffer which was populated with data.
         // Throws on failure (malformed input, destination too small).
-        public static int ConvertFromUtf16(
+        public static Span<byte> ConvertFromUtf16(
             ReadOnlySpan<char> inUtf16,
             Span<byte> outUtf8,
             InvalidSequenceBehavior invalidSequenceBehavior = InvalidSequenceBehavior.Fail) => throw null;
