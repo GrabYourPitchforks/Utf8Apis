@@ -126,23 +126,23 @@ namespace System.Text
          * TRANSFORMATION ROUTINES
          */
 
-        // Converts UTF8 -> uppercase UTF8 using the supplied CultureInfo (mustn't be null).
+        // Converts UTF8 -> lowercase UTF8 using the supplied CultureInfo (mustn't be null).
         // Assumes the input is a standalone UTF-8 string.
         // Returns the slice of the destination buffer which was populated with data.
         // Throws on failure (malformed input, destination too small).
-        public static Span<byte> ToUpper(
+        public static Span<byte> ToLower(
             ReadOnlySpan<byte> inUtf8,
             Span<byte> outUtf8,
             CultureInfo culture) => throw null;
 
-        // Convenience method for ToUpper that flows through the invariant culture.
-        public static Span<byte> ToUpperInvariant(
+        // Convenience method for ToLower that flows through the invariant culture.
+        public static Span<byte> ToLowerInvariant(
             ReadOnlySpan<byte> inUtf8,
             Span<byte> outUtf8) => throw null;
 
-        // A non-throwing form of ToUpper.
+        // A non-throwing form of ToLower.
         // Follows normal OperationStatus-style conventions.
-        public static OperationStatus ToUpper(
+        public static OperationStatus ToLower(
             ReadOnlySpan<byte> inUtf8,
             Span<byte> outfUtf8,
             out int bytesConsumed,
