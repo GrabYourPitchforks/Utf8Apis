@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 
 namespace System.Text
@@ -112,83 +113,95 @@ namespace System.Text
         //
         // (Assume there are TrimStart / TrimEnd equivalents of Trim.)
 
+        /*
+         * SPLIT ROUTINES
+         */
 
-        // Converts UTF8 -> UTF8, fixing up invalid sequences along the way.
-        // (This will never return InvalidData.)
-        public static OperationStatus ConvertToValidUtf8(
-            ReadOnlySpan<Char8> input,
-            Span<Char8> output,
-            out int elementsConsumed,
-            out int elementsWritten,
+        // Returns a ref struct that duck types an enumerator
+        public static Utf8SpanSplitEnumerator Split(
+            ReadOnlySpan<byte> inUtf8,
+            UnicodeScalar splitScalar) => throw null;
+
+        /*
+         * TRANSFORMATION ROUTINES
+         */
+
+        // Converts UTF8 -> uppercase UTF8 using the supplied CultureInfo (mustn't be null).
+        // Assumes the input is a standalone UTF-8 string.
+        // Returns the slice of the destination buffer which was populated with data.
+        // Throws on failure (malformed input, destination too small).
+        public static Span<byte> ToUpper(
+            ReadOnlySpan<byte> inUtf8,
+            Span<byte> outUtf8,
+            CultureInfo culture) => throw null;
+
+        // Convenience method for ToUpper that flows through the invariant culture.
+        public static Span<byte> ToUpperInvariant(
+            ReadOnlySpan<byte> inUtf8,
+            Span<byte> outUtf8) => throw null;
+
+        // A non-throwing form of ToUpper.
+        // Follows normal OperationStatus-style conventions.
+        public static OperationStatus ToUpper(
+            ReadOnlySpan<byte> inUtf8,
+            Span<byte> outfUtf8,
+            out int bytesConsumed,
+            out int bytesWritten,
+            CultureInfo culture,
+            InvalidSequenceBehavior invalidSequenceBehavior = InvalidSequenceBehavior.Fail,
             bool isFinalChunk = true) => throw null;
 
-        // Same as above, but input buffer has T=byte
-        public static OperationStatus ConvertToValidUtf8(
-            ReadOnlySpan<byte> input,
-            Span<Char8> output,
-            out int elementsConsumed,
-            out int elementsWritten,
-            bool isFinalChunk = true) => throw null;
+        /*
+         * VALIDATION AND INSPECTION
+         */
 
-        // If the input is valid UTF-8, returns the input as-is.
-        // If the input is not valid UTF-8, replaces invalid sequences and returns
-        // a Utf8String which is well-formed UTF-8.
-        public static Utf8String ConvertToValidUtf8(Utf8String input) => throw null;
+        // Returns true iff the input string contains only valid UTF-8 sequences.
+        public static bool IsWellFormed(
+            ReadOnlySpan<byte> inUtf8) => throw null;
 
-        // ROM<T>-based overload of above. Will return original input or allocate new buffer.
-        public static ReadOnlyMemory<Char8> ConvertToValidUtf8(ReadOnlyMemory<Char8> input) => throw null;
-    }
-
-    // Contains helper methods for inspecting UTF-8 data.
-    // Alternative naming: class Utf8Inspection in namespace System.Text.Utf8
-    public static partial class Utf8
-    {
-        // Allows forward enumeration over scalars.
-        // TODO: Should we also allow reverse enumeration? GetScalarsReverse?
-        public static Utf8SpanUnicodeScalarEnumerator GetScalars(ReadOnlySpan<byte> utf8Text) => throw null;
-        public static Utf8SpanUnicodeScalarEnumerator GetScalars(ReadOnlySpan<Char8> utf8Text) => throw null;
-
-        // Returns true iff the input consists only of well-formed UTF-8 sequences.
-        // This is O(n).
-        public static bool IsWellFormedUtf8Sequence(ReadOnlySpan<byte> utf8Text) => throw null;
-        public static bool IsWellFormedUtf8Sequence(ReadOnlySpan<Char8> utf8Text) => throw null;
-
-        // Returns true iff the Utf8String consists only of well-formed UTF-8 sequences.
-        // This will almost always be O(1) but may be O(n) in weird edge cases.
-        public static bool IsWellFormedUtf8String(Utf8String utf8String) => throw null;
-        
-        // Given UTF-8 input text, returns the number of UTF-16 characters and the
-        // number of scalars present. Returns false iff the input sequence is invalid
-        // and the invalid sequence behavior is to fail.
-        public static bool TryGetUtf16CharCount(
-            ReadOnlySpan<Char8> utf8Text,
-            out int utf16CharCount,
-            out int scalarCount,
-            InvalidSequenceBehavior replacementBehavior = InvalidSequenceBehavior.Fail) => throw null;
-
-        // Given UTF-16 input text, returns the number of UTF-8 characters and the
-        // number of scalars present. Returns false iff the input sequence is invalid
-        // and the invalid sequence behavior is to fail *or* if the required number of
-        // UTF-8 chars does not fit into an Int32.
-        // TODO: Does that mean the 'out' type should be long?
-        public static bool TryGetUtf8CharCount(
-            ReadOnlySpan<char> utf16Text,
-            out int utf8CharCount,
-            out int scalarCount,
-            InvalidSequenceBehavior replacementBehavior = InvalidSequenceBehavior.Fail) => throw null;
-
-        // Returns the index of the first invalid UTF-8 sequence, or -1 if the input text
-        // is well-formed UTF-8. Additionally returns the number of UTF-16 chars and the
-        // number of scalars seen up until that point. (If returns -1, the two 'out' values
-        // represent the values for the entire string.)
-        public static int GetIndexOfFirstInvalidUtf8Sequence(
-            ReadOnlySpan<Char8> utf8Text,
+        // Returns the byte index of the first invalid UTF-8 sequence in the input stream,
+        // or -1 if no invalid sequence is found. Also returns the UTF-16 char count and
+        // total scalar count required to represent the input were it to be transcoded.
+        // If the return value is non-negative, the UTF-16 char count and scalar count are
+        // the counts up to (but not including) the first invalid UTF-8 sequence.
+        public static int GetIndexOfFirstInvalidSequence(
+            ReadOnlySpan<byte> inUtf8,
             out int utf16CharCount,
             out int scalarCount) => throw null;
+
+        // Copies UTF-8 input to UTF-8 output, replacing any invalid sequences seen with
+        // U+FFFD. The input is assumed to be a standalone string. Throws if the destination
+        // buffer is too small to hold the resulting value. Returns the slice of the destination
+        // buffer to which the output was written.
+        public static Span<byte> ConvertToValidUtf8(
+            ReadOnlySpan<byte> inUtf8,
+            Span<byte> outUtf8) => throw null;
+
+        // A non-throwing form of ConvertToValidUtf8.
+        // Follows normal OperationStatus-style conventions.
+        public static OperationStatus ConvertToValidUtf8(
+            ReadOnlySpan<byte> inUtf8,
+            Span<byte> outUtf8,
+            out int bytesConsumed,
+            out int bytesWritten,
+            bool isFinalChunk = true) => throw null;
+
+        /*
+         * ENUMERATION
+         */
+
+        // Allows forward enumeration of scalar values from UTF-8 input.
+        public static Utf8SpanUnicodeScalarEnumerator EnumerateForward(
+            ReadOnlySpan<byte> inUtf8) => throw null;
+
+        // Allows forward enumeration of scalar values from UTF-8 input.
+        public static Utf8SpanUnicodeScalarReverseEnumerator EnumerateReverse(
+            ReadOnlySpan<byte> inUtf8) => throw null;
     }
 
     // Allows streaming validation of input.
     // !! MUTABLE STRUCT !!
+    // This type is mainly to support WebSockets and similar scenarios.
     public struct Utf8StreamingValidator
     {
         // Returns true iff all data seen up to now represents well-formed UTF-8,
