@@ -14,4 +14,9 @@ class JsonEncoder
         out int bytesWritten,
         InvalidSequenceBehavior invalidSequenceBehavior = InvalidSequenceBehavior.Fail,
         bool isFinalChunk = true) => throw null;
+
+    public RentedArray<byte> Encode(
+        ReadOnlySpan<byte> inUtf8,
+        InvalidSequenceBehavior invalidSequenceBehavior = InvalidSequenceBehavior.Fail,
+        ArrayPool<byte> arrayPool = default) => throw null;
 }

@@ -63,4 +63,41 @@ static class Samples
             ArrayPool<byte>.Shared.Return(scratch2);
         }
     }
+
+
+
+
+
+    /*
+     * SIMPLER API PROPOSAL
+     */
+
+    static void JsonSerialize_Simple_Helper(ReadOnlySpan<char> input, IBufferWriter<byte> writer)
+    {
+        // var = RentedArray<byte>
+        using (var utf8Transcoded = Utf8.ConvertFromUtf16(input))
+        {
+            using (var jsonEncoded = JsonEncoder.Default.Encode(utf8Transcoded.AsSpan()))
+            {
+                writer.Write(jsonEncoded.AsSpan());
+            }
+        }
+    }
+
+    // Writes an IDictionary<string, string> as a UTF-8 JSON object using the "simple" APIs
+    static void JsonSerialize_Simple(IDictionary<string, string> dictionary, IBufferWriter<byte> writer)
+    {
+        writer.Write(utf8"{");
+
+        foreach (var entry in dictionary)
+        {
+            writer.Write(utf8"\"");
+            JsonSerialize_Simple_Helper(entry.Key, writer);
+            writer.Write(utf8"\":\"");
+            JsonSerialize_Simple_Helper(entry.Key, writer);
+            writer.Write(utf8"\"");
+        }
+
+        writer.Write(utf8"}");
+    }
 }
