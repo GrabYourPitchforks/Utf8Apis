@@ -152,6 +152,26 @@ namespace System.Text
             bool isFinalChunk = true) => throw null;
 
         /*
+         * HASH CODE COMPUTATION
+         */
+
+        // Both of the hash code computation routines assume that the input is self-contained;
+        // i.e., there's an implicit "isFinalChunk = true". Additional note to implementer: to
+        // limit risk of hash DOS the hash code should be randomized, and in the face of invalid
+        // sequences the invalid bytes should somehow be mixed into the final output to avoid
+        // several different invalid sequences all projecting to the same hash code value. The
+        // exception is StringComparison.Ordinal, which is just a straight up byte comparison.
+
+        public static int GetHashCode(
+            ReadOnlySpan<byte> inUtf8,
+            StringComparison stringComparison) => throw null;
+
+        public static int GetHashCode(
+            ReadOnlySpan<byte> inUtf8,
+            CultureInfo culture,
+            bool caseSensitive) => throw null;
+
+        /*
          * VALIDATION AND INSPECTION
          */
 
