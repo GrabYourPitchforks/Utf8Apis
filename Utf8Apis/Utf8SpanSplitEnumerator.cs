@@ -4,6 +4,8 @@
     {
         public ReadOnlySpan<byte> Current { get => throw null; }
 
+        public Utf8SpanSplitEnumerator GetEnumerator() => throw null;
+
         public bool MoveNext() => throw null;
     }
 }

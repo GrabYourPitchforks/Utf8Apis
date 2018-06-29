@@ -20,3 +20,17 @@ class JsonEncoder
         InvalidSequenceBehavior invalidSequenceBehavior = InvalidSequenceBehavior.Fail,
         ArrayPool<byte> arrayPool = default) => throw null;
 }
+
+class UrlEncoder
+{
+    public static UrlEncoder Default => throw null;
+
+    public OperationStatus Decode(
+        ReadOnlySpan<byte> inUtf8,
+        Span<byte> outUtf8,
+        out int bytesConsumed,
+        out int bytesWritten,
+        bool isQueryString,
+        InvalidSequenceBehavior invalidSequenceBehavior = InvalidSequenceBehavior.Fail,
+        bool isFinalChunk = true) => throw null;
+}
