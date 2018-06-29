@@ -18,6 +18,11 @@ static class Samples
             {
                 throw new Exception("Bad input.");
             }
+            if (utf16CharsConsumed == 0 && utf8TranscodingOperationStatus != OperationStatus.Done)
+            {
+                throw new Exception("Unexpected return value. Bailing so we don't end up in an infinite loop.");
+            }
+
             utf16InputToEncode = utf16InputToEncode.Slice(utf16CharsConsumed);
 
             // Now that we've properly transcoded UTF-16 -> UTF-8, JSON-encode it and write it to the output.
@@ -30,8 +35,12 @@ static class Samples
                 {
                     throw new Exception("Bad input.");
                 }
-                utf8JsonInputToEncode = utf8JsonInputToEncode.Slice(utf8BytesConsumed);
+                if (utf8BytesConsumed == 0 && jsonEncodingOperationStatus != OperationStatus.Done)
+                {
+                    throw new Exception("Unexpected return value. Bailing so we don't end up in an infinite loop.");
+                }
 
+                utf8JsonInputToEncode = utf8JsonInputToEncode.Slice(utf8BytesConsumed);
                 writer.Write(scratch2.Slice(0, jsonEncodedBytesWritten));
             } while (jsonEncodingOperationStatus != OperationStatus.Done);
         } while (utf8TranscodingOperationStatus != OperationStatus.Done);
