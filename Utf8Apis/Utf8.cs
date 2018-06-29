@@ -219,6 +219,10 @@ namespace System.Text
             ReadOnlySpan<byte> inUtf8) => throw null;
     }
 
+    /*
+     * STREAMING VALIDATION OF INPUT
+     */
+
     // Allows streaming validation of input.
     // !! MUTABLE STRUCT !!
     // This type is mainly to support WebSockets and similar scenarios.
@@ -228,5 +232,19 @@ namespace System.Text
         // Returns true iff all data seen up to now represents well-formed UTF-8,
         // or false iff any data consumed so far has an invalid UTF-8 sequence.
         public bool TryConsume(ReadOnlySpan<byte> data, bool isFinalChunk) => throw null;
+    }
+
+    // Alternative design:
+    // Immutable state object that the caller keeps passing via a ref parameter.
+
+    public static class Utf8StreamingValidator
+    {
+        public static bool TryConsume(ReadOnlySpan<byte> data, ref State state, bool isFinalChunk) => throw null;
+
+        public readonly struct State
+        {
+            // internals are opaque
+            // (it's really backed by a single uint field)
+        }
     }
 }
