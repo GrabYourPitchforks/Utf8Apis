@@ -222,6 +222,7 @@ namespace System.Text
     // Allows streaming validation of input.
     // !! MUTABLE STRUCT !!
     // This type is mainly to support WebSockets and similar scenarios.
+    // See https://github.com/dotnet/corefx/blob/master/src/Common/src/System/Net/WebSockets/ManagedWebSocket.cs, search "TryValidateUtf8"
     public struct Utf8StreamingValidator
     {
         // Returns true iff all data seen up to now represents well-formed UTF-8,
