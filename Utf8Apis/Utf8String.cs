@@ -45,6 +45,9 @@ namespace System
         // For discoverability / ease of use, equivalent to ROS<char>-based ctor
         public Utf8String(String value) => throw null;
 
+        // For creating from a sequence of discontiguous buffers containing UTF-8 data
+        public Utf8String(ReadOnlySequence<byte> value) => throw null;
+
         /*
          * COMPARISON
          * All equality / comparison methods which don't explicitly take a StringComparison
